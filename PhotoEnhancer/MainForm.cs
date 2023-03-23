@@ -22,12 +22,9 @@ namespace PhotoEnhancer
         {
             InitializeComponent();
 
-            var bmp = (Bitmap)Image.FromFile("cat.jpg");
-            orginalPictureBox.Image = bmp;
-            originalPhoto = Convertors.BitmapToPhoto(bmp);
-
-            //filtersComboBox.Items.Add("Осветление/затемнение");
-            filtersComboBox.Items.Add(new LighteningFilter());
+            //var bmp = (Bitmap)Image.FromFile("cat.jpg");
+            //originalPictureBox.Image = bmp;
+            //originalPhoto = Convertors.BitmapToPhoto(bmp);
         }
 
         private void filtersComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -81,55 +78,75 @@ namespace PhotoEnhancer
                 parameterControls.Add(inputBox);
             }
 
-            //if (filtersComboBox.SelectedItem.ToString() == "Осветление/затемнение")
-            //{
-            //    var label = new Label();
-            //    label.Left = 0;
-            //    label.Top = 0;
-            //    label.Width = parametersPanel.Width - 50;
-            //    label.Height = 28;
-            //    label.Text = "Коэффициент";
-            //    label.Font = new Font(label.Font.FontFamily, 10);
-            //    parametersPanel.Controls.Add(label);
-
-            //    var inputBox = new NumericUpDown();
-            //    inputBox.Left = label.Right;
-            //    inputBox.Top = label.Top;
-            //    inputBox.Width = parametersPanel.Width - label.Width;
-            //    inputBox.Height = label.Height;
-            //    inputBox.Font = new Font(inputBox.Font.FontFamily, 10);
-            //    inputBox.Minimum = 0;
-            //    inputBox.Maximum = 10;
-            //    inputBox.Increment = (decimal)0.05;
-            //    inputBox.DecimalPlaces = 2;
-            //    inputBox.Value = 1;
-            //    inputBox.Name = "coefficient";
-            //    parametersPanel.Controls.Add(inputBox);
-            //}
+            if(resultPhoto != null)
+            {
+                originalPhoto = resultPhoto;
+                originalPictureBox.Image = resultPictureBox.Image;
+                resultPhoto = null;
+                resultPictureBox.Image = null;
+            }
         }
 
         private void applyButton_Click(object sender, EventArgs e)
         {
-            var newPhoto = new Photo(originalPhoto.Width, originalPhoto.Height);
-
             var filter = filtersComboBox.SelectedItem as IFilter;
 
-            if (filtersComboBox.SelectedItem.ToString() == "Осветление/затемнение")
+            if(filter != null)
             {
-                var k = (double)((NumericUpDown)parametersPanel.Controls["coefficient"]).Value;
-                
-                for(var x = 0; x < originalPhoto.Width; x++)
-                    for(var y = 0; y < originalPhoto.Height; y++)
-                        newPhoto[x, y] = k * originalPhoto[x, y];
-            }
+                var parameters = new double[parameterControls.Count];
 
-            resultPhoto = newPhoto;
-            resultPictureBox.Image = Convertors.PhotoToBitmap(resultPhoto);
+                for(var i  = 0; i < parameters.Length; i++)
+                    parameters[i] = (double)parameterControls[i].Value;
+
+                resultPhoto = filter.Process(originalPhoto, parameters);
+                resultPictureBox.Image = Convertors.PhotoToBitmap(resultPhoto);
+
+                saveToolStripMenuItem.Enabled = true;
+            }
         }
 
-        private void orginalPictureBox_Click(object sender, EventArgs e)
+        public void AddFilter(IFilter filter)
+        {
+            if(filter != null)
+                filtersComboBox.Items.Add(filter);
+        }
+
+        private void originalPictureBox_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                filtersComboBox.Visible = true;
+
+                var bmp = (Bitmap)Image.FromFile(openFileDialog1.FileName);
+                originalPictureBox.Image = bmp;
+                originalPhoto = Convertors.BitmapToPhoto(bmp);
+                resultPictureBox.Image = null;
+                resultPhoto = null;
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                var bmp = Convertors.PhotoToBitmap(resultPhoto);
+                bmp.Save(saveFileDialog1.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
         }
     }
 }
