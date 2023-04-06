@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhotoEnhancer.Filters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace PhotoEnhancer
 
             mainForm.AddFilter(new LighteningFilter());
             mainForm.AddFilter(new GrayScaleFilter());
+            mainForm.AddFilter(new Trashhold());
 
             Application.Run(mainForm);
         }

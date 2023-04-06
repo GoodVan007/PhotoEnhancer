@@ -8,6 +8,7 @@ namespace PhotoEnhancer
 {
     public class LighteningFilter : PixelFilter
     {
+         
         public override ParameterInfo[] GetParametersInfo()
         {
             return new[]
@@ -22,7 +23,6 @@ namespace PhotoEnhancer
                 }
             };
         }
-
         public override Pixel ProcessPixel(Pixel pixel, double[] parameters)
         {
             return pixel * parameters[0];
@@ -32,5 +32,6 @@ namespace PhotoEnhancer
         {
             return "Осветление/затемнение";
         }
+
     }
 }
